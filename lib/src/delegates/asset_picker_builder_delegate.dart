@@ -1099,9 +1099,9 @@ class DefaultAssetPickerBuilderDelegate
   @override
   AssetPickerAppBar appBar(BuildContext context) {
     final AssetPickerAppBar appBar = AssetPickerAppBar(
-      title: Semantics(
-        onTapHint: semanticsTextDelegate.sActionSwitchPathLabel,
-        child: pathEntitySelector(context),
+      title: Text(
+        'Select Photos & Videos',
+        style: Theme.of(context).textTheme.headlineMedium,
       ),
       leading: backButton(context),
       blurRadius: isAppleOS(context) ? appleOSBlurRadius : 0,
