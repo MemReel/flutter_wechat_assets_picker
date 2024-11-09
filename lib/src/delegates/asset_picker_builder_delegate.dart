@@ -1665,39 +1665,59 @@ class DefaultAssetPickerBuilderDelegate
         final bool isSelectedNotEmpty = p.isSelectedNotEmpty;
         final bool shouldAllowConfirm =
             isSelectedNotEmpty || p.previousSelectedAssets.isNotEmpty;
-        return MaterialButton(
-          minWidth: shouldAllowConfirm ? 48 : 20,
-          height: appBarItemHeight,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          color: theme.colorScheme.secondary,
-          disabledColor: theme.splashColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(3),
-          ),
+        return FloatingActionButton(
+          mini: true,
+          shape: const CircleBorder(),
+          elevation: 0,
+          // color should be gray when disabled, otherwise primary color
+          backgroundColor: shouldAllowConfirm
+              ? theme.colorScheme.primary
+              : theme.disabledColor,
           onPressed: shouldAllowConfirm
               ? () {
                   Navigator.maybeOf(context)?.maybePop(p.selectedAssets);
                 }
               : null,
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          child: ScaleText(
-            isSelectedNotEmpty && !isSingleAssetMode
-                ? '${textDelegate.confirm}'
-                    ' (${p.selectedAssets.length}/${p.maxAssets})'
-                : textDelegate.confirm,
-            style: TextStyle(
-              color: shouldAllowConfirm
-                  ? theme.textTheme.bodyLarge?.color
-                  : theme.textTheme.bodySmall?.color,
-              fontSize: 17,
-              fontWeight: FontWeight.normal,
-            ),
-            semanticsLabel: isSelectedNotEmpty && !isSingleAssetMode
-                ? '${semanticsTextDelegate.confirm}'
-                    ' (${p.selectedAssets.length}/${p.maxAssets})'
-                : semanticsTextDelegate.confirm,
+          child: Icon(
+            Icons.arrow_forward,
+            color: shouldAllowConfirm
+                ? theme.colorScheme.surface
+                : theme.disabledColor,
           ),
         );
+        // return MaterialButton(
+        //   minWidth: shouldAllowConfirm ? 48 : 20,
+        //   height: appBarItemHeight,
+        //   padding: const EdgeInsets.symmetric(horizontal: 12),
+        //   color: theme.colorScheme.secondary,
+        //   disabledColor: theme.splashColor,
+        //   shape: RoundedRectangleBorder(
+        //     borderRadius: BorderRadius.circular(3),
+        //   ),
+        //   onPressed: shouldAllowConfirm
+        //       ? () {
+        //           Navigator.maybeOf(context)?.maybePop(p.selectedAssets);
+        //         }
+        //       : null,
+        //   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        //   child: ScaleText(
+        //     isSelectedNotEmpty && !isSingleAssetMode
+        //         ? '${textDelegate.confirm}'
+        //             ' (${p.selectedAssets.length}/${p.maxAssets})'
+        //         : textDelegate.confirm,
+        //     style: TextStyle(
+        //       color: shouldAllowConfirm
+        //           ? theme.textTheme.bodyLarge?.color
+        //           : theme.textTheme.bodySmall?.color,
+        //       fontSize: 17,
+        //       fontWeight: FontWeight.normal,
+        //     ),
+        //     semanticsLabel: isSelectedNotEmpty && !isSingleAssetMode
+        //         ? '${semanticsTextDelegate.confirm}'
+        //             ' (${p.selectedAssets.length}/${p.maxAssets})'
+        //         : semanticsTextDelegate.confirm,
+        //   ),
+        // );
       },
     );
   }
@@ -2174,7 +2194,7 @@ class DefaultAssetPickerBuilderDelegate
   @override
   Widget selectIndicator(BuildContext context, int index, AssetEntity asset) {
     final double indicatorSize =
-        MediaQuery.sizeOf(context).width / gridCount / 3;
+        MediaQuery.sizeOf(context).width / gridCount / 4;
     final Duration duration = switchingPathDuration * 0.75;
     return Selector<DefaultAssetPickerProvider, String>(
       selector: (_, DefaultAssetPickerProvider p) => p.selectedDescriptions,
@@ -2186,9 +2206,9 @@ class DefaultAssetPickerBuilderDelegate
           height: indicatorSize / (isAppleOS(context) ? 1.25 : 1.5),
           padding: EdgeInsets.all(indicatorSize / 10),
           decoration: BoxDecoration(
-            border: !selected
+            border: selected
                 ? Border.all(
-                    color: context.theme.unselectedWidgetColor,
+                    color: context.theme.colorScheme.surface,
                     width: indicatorSize / 25,
                   )
                 : null,
@@ -2199,8 +2219,15 @@ class DefaultAssetPickerBuilderDelegate
             child: AnimatedSwitcher(
               duration: duration,
               reverseDuration: duration,
-              child:
-                  selected ? const Icon(Icons.check) : const SizedBox.shrink(),
+              child: selected
+                  ? Text(
+                      '${context.read<DefaultAssetPickerProvider>().selectedAssets.indexOf(asset) + 1}',
+                      style: theme.textTheme.labelMedium!.copyWith(
+                        color: theme.colorScheme.surface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : const SizedBox.shrink(),
             ),
           ),
         );
@@ -2250,29 +2277,30 @@ class DefaultAssetPickerBuilderDelegate
               duration: switchingPathDuration,
               padding: EdgeInsets.all(indicatorSize * .35),
               color: selected
-                  ? theme.colorScheme.primary.withOpacity(.45)
+                  ? theme.colorScheme.surface.withOpacity(.5)
                   : theme.colorScheme.background.withOpacity(.1),
-              child: selected && !isSingleAssetMode
-                  ? Align(
-                      alignment: AlignmentDirectional.topStart,
-                      child: SizedBox(
-                        height: indicatorSize / 2.5,
-                        child: FittedBox(
-                          alignment: AlignmentDirectional.topStart,
-                          fit: BoxFit.cover,
-                          child: Text(
-                            '${index + 1}',
-                            style: TextStyle(
-                              color: theme.textTheme.bodyLarge?.color
-                                  ?.withOpacity(.75),
-                              fontWeight: FontWeight.w600,
-                              height: 1,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
+              child: const SizedBox.shrink(),
+              // child: selected && !isSingleAssetMode
+              //     ? Align(
+              //         alignment: AlignmentDirectional.topStart,
+              //         child: SizedBox(
+              //           height: indicatorSize / 2.5,
+              //           child: FittedBox(
+              //             alignment: AlignmentDirectional.topStart,
+              //             fit: BoxFit.cover,
+              //             child: Text(
+              //               '${index + 1}',
+              //               style: TextStyle(
+              //                 color: theme.textTheme.bodyLarge?.color
+              //                     ?.withOpacity(.75),
+              //                 fontWeight: FontWeight.w600,
+              //                 height: 1,
+              //               ),
+              //             ),
+              //           ),
+              //         ),
+              //       )
+              //     : const SizedBox.shrink(),
             );
           },
         ),
@@ -2303,7 +2331,11 @@ class DefaultAssetPickerBuilderDelegate
         ),
         child: Row(
           children: <Widget>[
-            const Icon(Icons.videocam, size: 22, color: Colors.white),
+            const Icon(
+              Icons.play_circle,
+              size: 18,
+              color: Colors.white,
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsetsDirectional.only(start: 4),
@@ -2311,13 +2343,12 @@ class DefaultAssetPickerBuilderDelegate
                   textDelegate.durationIndicatorBuilder(
                     Duration(seconds: asset.duration),
                   ),
-                  style: const TextStyle(color: Colors.white, fontSize: 15),
-                  strutStyle: const StrutStyle(
-                    forceStrutHeight: true,
-                    height: 1.4,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
                   ),
                   maxLines: 1,
-                  maxScaleFactor: 1.2,
                   semanticsLabel:
                       semanticsTextDelegate.durationIndicatorBuilder(
                     Duration(seconds: asset.duration),
@@ -2384,15 +2415,32 @@ class DefaultAssetPickerBuilderDelegate
         Container(
           alignment: AlignmentDirectional.center,
           height: bottomActionBarHeight + context.bottomPadding,
-          padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(
-            bottom: context.bottomPadding,
-          ),
-          color: theme.bottomAppBarTheme.color?.withOpacity(
-            theme.bottomAppBarTheme.color!.opacity *
-                (isAppleOS(context) ? .9 : 1),
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          color: Colors.white,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (!isSingleAssetMode)
+                    Text(
+                      'Select up to ${provider.maxAssets} photos/videos',
+                      style: theme.textTheme.bodyMedium!.copyWith(
+                        color: theme.colorScheme.onPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  Text(
+                    '${provider.selectedAssets.length}/${provider.maxAssets} selected',
+                    style: theme.textTheme.titleSmall!.copyWith(
+                      color: theme.colorScheme.onSecondary,
+                    ),
+                  ),
+                ],
+              ),
               if (isPreviewEnabled) previewButton(context),
               if (isPreviewEnabled || !isSingleAssetMode) const Spacer(),
               if (isPreviewEnabled || !isSingleAssetMode)
