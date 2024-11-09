@@ -1104,7 +1104,6 @@ class DefaultAssetPickerBuilderDelegate
         style: Theme.of(context).textTheme.headlineMedium,
       ),
       leading: backButton(context),
-      blurRadius: isAppleOS(context) ? appleOSBlurRadius : 0,
     );
     appBarPreferredSize ??= appBar.preferredSize;
     return appBar;
@@ -2383,6 +2382,7 @@ class DefaultAssetPickerBuilderDelegate
       if (isPermissionLimited) accessLimitedBottomTip(context),
       if (hasBottomActions)
         Container(
+          alignment: AlignmentDirectional.center,
           height: bottomActionBarHeight + context.bottomPadding,
           padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(
             bottom: context.bottomPadding,
@@ -2404,21 +2404,10 @@ class DefaultAssetPickerBuilderDelegate
     if (children.isEmpty) {
       return const SizedBox.shrink();
     }
-    Widget child = Column(
+    final Widget child = Column(
       mainAxisSize: MainAxisSize.min,
       children: children,
     );
-    if (isAppleOS(context)) {
-      child = ClipRect(
-        child: BackdropFilter(
-          filter: ui.ImageFilter.blur(
-            sigmaX: appleOSBlurRadius,
-            sigmaY: appleOSBlurRadius,
-          ),
-          child: child,
-        ),
-      );
-    }
     return child;
   }
 
